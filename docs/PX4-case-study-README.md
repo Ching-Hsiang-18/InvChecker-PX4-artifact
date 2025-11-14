@@ -2,7 +2,7 @@
 
 ## Abstract
 
-This is the documentation for the PX4 defective comparator case study presented in the paper: **InvChecker: Understanding the Invariant Expectation in Sorting Functions**. The vulnerability has been disclosed and reported to the official PX4 GitHub repository. See the issue here: https://github.com/PX4/PX4-Autopilot/issues/25917#issue-3623057276
+This is the documentation for the PX4 defective comparator case study presented in the paper: **InvChecker: Understanding the Invariant Expectation in Sorting Functions**. The vulnerability has been disclosed and reported to the official PX4 GitHub repository. See the issue here: [PX4/PX4-Autopilot#25917](https://github.com/PX4/PX4-Autopilot/issues/25917#issue-3623057276)
 
 ---
 
@@ -30,7 +30,7 @@ This is the documentation for the PX4 defective comparator case study presented 
 
 ### Install and Run PX4
 
-Install, compile, and run PX4 following the official guide at https://docs.px4.io/main/en/dev_setup/dev_env.html. For this case study, we use the **Typhoon H480** vehicle model.
+Install, compile, and run PX4 following the official guide [here](https://docs.px4.io/main/en/dev_setup/dev_env.html). For this case study, we use the **Typhoon H480** vehicle model.
 
 To run the simulation with visualization, execute the following command in your terminal:
 
@@ -128,7 +128,7 @@ Example:
 
 #### Overview
 
-You can upload your flight log to https://logs.px4.io/ for a comprehensive analysis. However, for this experiment, we only need to observe two variables—the **calculated median** and the **`_is_blocked` flag**—so local extraction using `ulog2csv` is sufficient.
+You can upload your flight log to the [official website](https://logs.px4.io/) for a comprehensive analysis. However, for this experiment, we only need to observe two variables—the **calculated median** and the **`_is_blocked` flag**—so local extraction using `ulog2csv` is sufficient.
 
 #### Key Topics to Inspect
 
@@ -186,7 +186,7 @@ All code modifications are marked with the comment `//INV` for easy identificati
 
 For a minimal and modular design, we inject distance sensor readings via MAVLink. However, the native `mavutil.mavlink_connection.mav.distance_sensor_send` function has a range check that prevents the injection of NaN values.
 
-**Modification:** In `mavlink_receiver.cpp` at line 975 (https://github.com/PX4/PX4-Autopilot/blob/82d8813987856c34c5fe8c7ea75ec45e1b57f232/src/modules/mavlink/mavlink_receiver.cpp#L975), replace the existing code with:
+**Modification:** In `mavlink_receiver.cpp` at [line 975](https://github.com/PX4/PX4-Autopilot/blob/82d8813987856c34c5fe8c7ea75ec45e1b57f232/src/modules/mavlink/mavlink_receiver.cpp#L975), replace the existing code with:
 
     //INV
     if (dist_sensor.current_distance > 60000u && dist_sensor.current_distance < 62000u) {
@@ -201,7 +201,7 @@ This allows inputs between 600m and 620m in the injection script to be translate
 
 ### Range Finder Debug Logging
 
-To enable recording of variables in the flight log, add the following code to `sensor_range_finder.cpp` (https://github.com/PX4/PX4-Autopilot/blob/82d8813987856c34c5fe8c7ea75ec45e1b57f232/src/modules/ekf2/EKF/aid_sources/range_finder/sensor_range_finder.cpp):
+To enable recording of variables in the flight log, add the following code to [sensor_range_finder.cpp](https://github.com/PX4/PX4-Autopilot/blob/82d8813987856c34c5fe8c7ea75ec45e1b57f232/src/modules/ekf2/EKF/aid_sources/range_finder/sensor_range_finder.cpp):
 
 **At the top of the file (includes):**
 
@@ -230,7 +230,7 @@ To enable recording of variables in the flight log, add the following code to `s
         g_dbg_arr.publish(m);
     }
 
-**Inside `SensorRangeFinder::updateFogCheck()` at line 152 (https://github.com/PX4/PX4-Autopilot/blob/82d8813987856c34c5fe8c7ea75ec45e1b57f232/src/modules/ekf2/EKF/aid_sources/range_finder/sensor_range_finder.cpp#L152), add:**
+**Inside `SensorRangeFinder::updateFogCheck()` at [line 152](https://github.com/PX4/PX4-Autopilot/blob/82d8813987856c34c5fe8c7ea75ec45e1b57f232/src/modules/ekf2/EKF/aid_sources/range_finder/sensor_range_finder.cpp#L152), add:**
 
     //INV
     rng_debug_publish(median_dist, _is_blocked);
@@ -239,7 +239,7 @@ To enable recording of variables in the flight log, add the following code to `s
 
 ### Bypass NaN Filtering
 
-In `SensorRangeFinder::isDataInRange()` at line 115 (https://github.com/PX4/PX4-Autopilot/blob/82d8813987856c34c5fe8c7ea75ec45e1b57f232/src/modules/ekf2/EKF/aid_sources/range_finder/sensor_range_finder.cpp#L115), modify the function to bypass NaN filtering:
+In `SensorRangeFinder::isDataInRange()` at [line 115](https://github.com/PX4/PX4-Autopilot/blob/82d8813987856c34c5fe8c7ea75ec45e1b57f232/src/modules/ekf2/EKF/aid_sources/range_finder/sensor_range_finder.cpp#L115), modify the function to bypass NaN filtering:
 
     inline bool SensorRangeFinder::isDataInRange() const
     {
@@ -259,7 +259,7 @@ In `SensorRangeFinder::isDataInRange()` at line 115 (https://github.com/PX4/PX4-
 
 ### Log the Debug Topic
 
-To actually write our recorded data into the flight log, add the `debug_array` topic to the default topic list in `logged_topics.cpp` at line 46 (https://github.com/PX4/PX4-Autopilot/blob/82d8813987856c34c5fe8c7ea75ec45e1b57f232/src/modules/logger/logged_topics.cpp#L46):
+To actually write our recorded data into the flight log, add the `debug_array` topic to the default topic list in `logged_topics.cpp` at [line 46](https://github.com/PX4/PX4-Autopilot/blob/82d8813987856c34c5fe8c7ea75ec45e1b57f232/src/modules/logger/logged_topics.cpp#L46):
 
     //INV
     add_topic("debug_array");
@@ -345,9 +345,3 @@ For a cleaner simulation view, you can configure the spawned map in Gazebo at:
         </physics>
       </world>
     </sdf>
-
----
-
-## Summary
-
-This documentation provides a complete guide to reproduce the PX4 defective comparator case study. Follow the steps carefully, and ensure all modifications are properly applied before running the experiment. For any issues or questions, please refer to the GitHub issue at https://github.com/PX4/PX4-Autopilot/issues/25917 or contact the authors of the paper.
